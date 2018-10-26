@@ -1,11 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
-import pandas as pd
 import datetime
-import sqlite3
 import scraperwiki
-
-#conn=sqlite3.connect("data.sqlite")
 
 linkliste = list(csv.reader(open("skigebiete_linkliste.csv")))
 
