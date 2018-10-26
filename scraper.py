@@ -1,25 +1,30 @@
-# This is a template for a Python scraper on morph.io (https://morph.io)
-# including some code snippets below that you should find helpful
-
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import datetime
+import sqlite3
 import scraperwiki
-import lxml.html
-#
-# # Read in a page
-# html = scraperwiki.scrape("http://foo.com")
-#
-# # Find something on the page using css selectors
-# root = lxml.html.fromstring(html)
-# root.cssselect("div[align='left']")
-#
-# # Write out to the sqlite database using scraperwiki library
-scraperwiki.sqlite.save(unique_keys=['name'], data={"name": "susan", "occupation": "software developer"})
-#
-# # An arbitrary query against the database
-scraperwiki.sql.select("* from data where 'name'='peter'")
 
-# You don't have to do things with the ScraperWiki and lxml libraries.
-# You can use whatever libraries you want: https://morph.io/documentation/python
-# All that matters is that your final data is written to an SQLite database
-# called "data.sqlite" in the current working directory which has at least a table
-# called "data".
-html = scraperwiki.scrape("https://www.bergfex.ch/schweiz/")
+#conn=sqlite3.connect("data.sqlite")
+
+df = pd.read_csv("skigebiete_linkliste.csv")
+linkliste = df['0'].tolist()
+
+skigebiete_final = []
+for gebiet_link in linkliste:
+    print(gebiet_link)
+    website = requests.get("https://www.bergfex.ch"+gebiet_link).text
+    soup = BeautifulSoup(website, "html.parser")
+
+    # Titel des Skigebiets
+    titel = soup.find('h1', {"class": "has-sup"})
+    titel = (titel.text.replace("Skigebiet ", ""))
+    # Offene Skilifte auslesen
+    for skigebiet in soup.find_all('table', class_="schneewerte"):
+        offenelifte = (skigebiet.find_all('td')[-1].text).split(" von ") # Auslesen im Format "12 von 24" (offene Lifte sind immer das letzte TD, deshalb -1)
+        total = offenelifte[1].strip()
+        offen = offenelifte[0].strip()
+        now = datetime.datetime.now()
+        scraperwiki.sqlite.save(unique_keys=['name'], data={"zeit": now.strftime("%Y-%m-%d_%H-%M"), "titel": titel, "totallifte": total, "offen": offen})
+        #skigebiete_final.append({"titel": titel, "totallifte": total, "offen": offen}) # In die finale Liste laden
+
