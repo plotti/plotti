@@ -7,8 +7,7 @@ import scraperwiki
 
 #conn=sqlite3.connect("data.sqlite")
 
-df = pd.read_csv("skigebiete_linkliste.csv")
-linkliste = df['0'].tolist()
+linkliste = list(csv.reader(open("skigebiete_linkliste.csv")))
 
 skigebiete_final = []
 for gebiet_link in linkliste:
