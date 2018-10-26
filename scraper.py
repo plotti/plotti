@@ -4,7 +4,10 @@ import datetime
 import scraperwiki
 import csv
 
-linkliste = list(csv.reader(open("skigebiete_linkliste.csv")))
+linkliste = []
+reader = csv.reader(open("skigebiete_linkliste.csv"))
+for row in reader:
+    linkliste.append(row[0])
 
 skigebiete_final = []
 for gebiet_link in linkliste:
